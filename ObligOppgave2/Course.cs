@@ -30,7 +30,7 @@ public class Course
     public string Name { get; set; }
     public decimal Points { get; set; }
     public int Capacity { get; set; }
-    public Grade Grade { get; set; }
+    public List<Grade> Grade { get; set; } = new ();
     public List<Course> Courses { get; set; } = new();
     public List<String> Participants { get; set; } = new();
 
@@ -83,14 +83,18 @@ public class Course
     {
         foreach (Course cr in Courses)
         {
+            string niceGD = "";
+            foreach (Grade g in cr.Grade)
+            {
+                niceGD = $"{g.Student.Name} - {g.StudentGrade}";
+            }
             string niceST = string.Join(", ", cr.Participants);
-            Console.WriteLine($"Navn: {cr.Name} Code: {cr.Code} Studiepoeng: {cr.Points} Antall plasser: {cr.Capacity} Deltagere: {niceST} Students Karakterer: {cr.Grade.Student.Name} - {cr.Grade.StudentGrade}");
-
+                Console.WriteLine($"Navn: {cr.Name} Code: {cr.Code} Studiepoeng: {cr.Points} Antall plasser: {cr.Capacity} Deltagere: {niceST} Students Karakterer: {niceGD}");
         }
     }
     public void SetGrade(Grade grade, Course course)
     {
-        course.Grade = grade;
+        course.Grade.Add(grade);
     }
 
 }
