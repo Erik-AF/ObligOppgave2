@@ -660,19 +660,43 @@ else if (UserInfo == 0 && studentCheck == true || UserInfo == 1 && UserRole == 0
                                         where courses1.Name == addInput1 || courses1.Code == addInput1
                                         select courses1).FirstOrDefault();
 
+                        bool doubleCheck = false;
+
                         if (courseQuerry != null)
                         {
-                            if (courseQuerry.Capacity > 0)
+                            var activeCourse3 = from sts in c.Courses
+                                                where student.Courses.Contains(sts.Code)
+                                                select sts;
+
+                            var activeCourseList3 = activeCourse3.ToList();
+
+                            foreach (Course cr in activeCourse3) 
                             {
-                                courseQuerry.Capacity--;
-                                addChecker1 = true;
-                                c.AddStudents(student, courseQuerry);
-                                s.AddCourses(courseQuerry, student);
+                                if(cr.Code == courseQuerry.Code) 
+                                {
+                                    doubleCheck = true;
+                                }
+                            }
+                            if(doubleCheck == false)
+                            {
+                                if (courseQuerry.Capacity > 0)
+                                {
+                                    courseQuerry.Capacity--;
+                                    addChecker1 = true;
+                                    c.AddStudents(student, courseQuerry);
+                                    s.AddCourses(courseQuerry, student);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Det er ikke flere ledige plasser på dette kurset. Vennligst velg et annet.");
+                                }
                             }
                             else
                             {
-                                Console.WriteLine("Det er ikke flere ledige plasser på dette kurset. Vennligst velg et annet.");
+                                Console.WriteLine("Du er allerede meldt opp til dette kurset");
+                                break;
                             }
+
 
                         }
                         else if (addInput1 == "STOPP")
