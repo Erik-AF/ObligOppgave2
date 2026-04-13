@@ -6,7 +6,9 @@ Student s = new Student();
 Student student1 = new Student("Lisa", "lisa@email.no","passord123","LisaLisa", "lisa123");
 Student student2 = new Student("Kåre Student", "kåre@uia.no","kåreerkul","kåremann", "kåre123");
 
+
 s.Students.Add(student1);
+
 s.Students.Add(student2);
 
 //Ansatte for tjenesten
@@ -24,9 +26,14 @@ Course tempCourse1 = new Course("IS-110", "Programmering", 10m, 2);
 
 c.Courses.Add(tempCourse1);
 c.Courses.Add(tempCourse);
-
 c.AddStudents(student1, tempCourse1);
 s.AddCourses(tempCourse1 ,student1);
+
+Grade testGrade = new Grade(student1, "A");
+c.SetGrade(testGrade, tempCourse1);
+Grade testGrade2 = new Grade(student1, "C");
+c.SetGrade(testGrade2, tempCourse1);
+
 
 //Bilbiotek for tjenesten
 Book b = new Book();
@@ -385,7 +392,6 @@ if (employee.Posistion == "Fag lærer")
                             {
                                 Console.WriteLine("\nVelg karakter for studenten fra A-F");
                                 string userGrade = Console.ReadLine().ToUpper();
-
                                 Grade newGrade = new Grade(studentQuerry, userGrade);
                                 c.SetGrade(newGrade, courseQuerry);
                                 // Kan brukes for å vise kurs info c.ShowCourses();
@@ -525,7 +531,7 @@ else if (employee.Posistion == "Bibliotek")
                 //Se aktive lån
                 case 1:
                     Console.WriteLine("Liste med aktive lån:");
-                    foreach (Employee emp in e.Employees) 
+                    foreach (Employee emp in e.Employees)
                     {
                         //Sjekke at den Ansatte har noen bøker på kontoen sin
                         var activeLoans = from sts in b.Books
@@ -567,11 +573,11 @@ else if (employee.Posistion == "Bibliotek")
                     }
 
                     break;
-                
+
                 //Se på låne historikk
                 case 2:
                     Console.WriteLine("Låne historik for ansatte:");
-                    foreach( Employee emp in e.Employees) 
+                    foreach (Employee emp in e.Employees)
                     {
                         var activeLoans = from sts in b.Books
                                           where emp.LoanHistory.Count > 0
@@ -587,7 +593,7 @@ else if (employee.Posistion == "Bibliotek")
 
                     }
                     Console.WriteLine("\nLåne historik for studenter:");
-                    foreach(Student std in s.Students)
+                    foreach (Student std in s.Students)
                     {
                         //Sjekke at den Ansatte har noen bøker på kontoen sin
                         var activeLoans = from sts in b.Books
@@ -600,7 +606,7 @@ else if (employee.Posistion == "Bibliotek")
                         {
                             s.ShowLoanHistorySt(std);
                         }
-                        
+
                     }
 
                     break;
@@ -610,7 +616,7 @@ else if (employee.Posistion == "Bibliotek")
 
             }
         }
-        catch (System.FormatException) 
+        catch (System.FormatException)
         {
             Console.WriteLine("Du må skrive inn et tall");
         }
@@ -619,7 +625,233 @@ else if (employee.Posistion == "Bibliotek")
 //Student view
 else if (UserInfo == 0 && studentCheck == true || UserInfo == 1 && UserRole == 0 && studentCheck == true)
 {
-    Console.WriteLine("Student");
+    while (exit == true)
+    {
+        try
+        {
+            Console.WriteLine("\n[0] Melde på kurs");
+            Console.WriteLine("[1] Melde av kurs");
+            Console.WriteLine("[2] Se karakterer");
+            Console.WriteLine("[3] Søk på bøker");
+            Console.WriteLine("[4] Lån bøker");
+            Console.WriteLine("[5] Se på kurs du er meldt på.");
+            Console.WriteLine("[6] Avslutt");
+            int emp_choise = int.Parse(Console.ReadLine());
+
+            switch (emp_choise)
+            {
+                //Melde student opp til kurs
+                case 0:
+                    Console.WriteLine("\nListe med aktive Kurs:");
+                    foreach (Course courses in c.Courses)
+                    {
+                        Console.WriteLine($"Navn: {courses.Name} Kode: {courses.Code} Studiepoeng: {courses.Points} Antall plasser: {courses.Capacity}");
+                    }
+
+                    //Søker etter kurs som bruker skriver inn å sjekker om det eksisterer
+                    Course courseQuerry = null;
+                    bool addChecker1 = false;
+                    while (addChecker1 == false)
+                    {
+                        Console.WriteLine("\nSkriv inn navnet eller koden på kurset:");
+                        string addInput1 = Console.ReadLine();
+
+                        courseQuerry = (from courses1 in c.Courses
+                                        where courses1.Name == addInput1 || courses1.Code == addInput1
+                                        select courses1).FirstOrDefault();
+
+                        if (courseQuerry != null)
+                        {
+                            if (courseQuerry.Capacity > 0)
+                            {
+                                courseQuerry.Capacity--;
+                                addChecker1 = true;
+                                c.AddStudents(student, courseQuerry);
+                                s.AddCourses(courseQuerry, student);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Det er ikke flere ledige plasser på dette kurset. Vennligst velg et annet.");
+                            }
+
+                        }
+                        else if (addInput1 == "STOPP")
+                        {
+                            addChecker1 = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Fant ikke kurset: {addInput1}. Vennligst skriv inn navn eller kode på en av kursene i listen");
+                            Console.WriteLine("Eller skriv STOPP for å gå tilbake til menyen");
+                        }
+
+                    }
+                    break;
+                //Melde av kurs
+                case 1:
+                    //Sjekke at studenten har kurs på brukeren sin
+
+                    var activeCourse = from sts in c.Courses
+                                       where student.Courses.Contains(sts.Code)
+                                       select sts;
+
+                    var activeCourseList = activeCourse.ToList();
+
+                    //Hvis studenten har emner på brukeren sin
+                    if (activeCourseList.Count() > 0)
+                    {
+
+                        //Viser Liste med kurs på studenen
+                        Console.WriteLine("\nListe med aktive kurs på studenten:");
+                        foreach (Course courses in activeCourse)
+                        {
+                            Console.WriteLine($"Navn: {courses.Name} Kode: {courses.Code} Studiepoeng: {courses.Points} Antall plasser: {courses.Capacity}");
+                        }
+
+                        //Søker etter kurs som bruker skriver inn å sjekker om det eksisterer
+                        Course courseQuerry9 = null;
+                        bool addChecker2 = false;
+                        while (addChecker2 == false)
+                        {
+                            Console.WriteLine("\nSkriv inn navnet eller koden på kurset:");
+                            string addInput1 = Console.ReadLine();
+
+                            courseQuerry9 = (from courses1 in activeCourse
+                                            where courses1.Name == addInput1 || courses1.Code == addInput1
+                                            select courses1).FirstOrDefault();
+
+                            if (courseQuerry9 != null)
+                            {
+                                courseQuerry9.Capacity++;
+                                addChecker2 = true;
+
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Fant ikke kurset: {addInput1}. Vennligst skriv inn navn eller kode på en av kursene i listen");
+                            }
+
+                        }
+                        c.RemoveStudents(student, courseQuerry9);
+                        s.RemoveCorses(courseQuerry9, student);
+                    }
+                    //Hvis personen ikke har noen emner på brukeren sin
+                    else
+                    {
+                        Console.WriteLine("Personen har ingen aktive kurs på brukeren sin");
+                        break;
+                    }
+
+
+            break;
+                //Se karatker
+                case 2:
+                    c.ShowGrade(student);
+                    break;
+                //Søk på bøker
+                case 3:
+                    Console.WriteLine("Søk etter bok på Tittel, Forfatter eller ID:");
+                    string bookSearch = Console.ReadLine();
+
+                    var searchBook = from search in b.Books
+                                     where search.Title.Contains(bookSearch) || search.Author.Contains(bookSearch) || search.Id.Contains(bookSearch)
+                                     select search;
+
+                    var bookList = searchBook.ToList();
+
+                    if (bookList.Count() > 0)
+                    {
+                        foreach (Book sBook in searchBook)
+                        {
+                            Console.WriteLine($"Id: {sBook.Id} Tittel: {sBook.Title} Forfatter: {sBook.Author} Publiserings år: {sBook.Year} Antall kopier: {sBook.NumbCopies}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Fant ingen bok som stemmet med søket ditt: {bookSearch}");
+                    }
+
+                    break;
+                //Lån bøker
+                case 4:
+                    Console.WriteLine("\nListe med bøker i bilblioteket:");
+                    foreach (Book books in b.Books)
+                    {
+                        Console.WriteLine($"Id: {books.Id} Tittel: {books.Title} Forfatter: {books.Author} Publiserings år: {books.Year} Antall kopier: {books.NumbCopies}");
+                    }
+
+                    //Søker etter bøker som bruker skriver inn å sjekker om det eksisterer
+                    Book bookQuerry = null;
+                    bool addChecker3 = false;
+                    while (addChecker3 == false)
+                    {
+                        Console.WriteLine("\nSkriv inn tittelen, forfatteren eller ID på boken:");
+                        string addInput1 = Console.ReadLine();
+
+                        bookQuerry = (from books1 in b.Books
+                                      where books1.Title == addInput1 || books1.Author == addInput1 || books1.Id == addInput1
+                                      select books1).FirstOrDefault();
+
+                        if (bookQuerry != null)
+                        {
+                            if (bookQuerry.NumbCopies > 0)
+                            {
+                                bookQuerry.NumbCopies--;
+                                addChecker3 = true;
+                                s.AddBooks(bookQuerry, student);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Det er ikke flere av denne boken igjen. Vennligst velg en annen.");
+                                Console.WriteLine("Eller skriv STOPP for å gå tilbake til menyen");
+                            }
+
+                        }
+                        else if (addInput1 == "STOPP")
+                        {
+                            addChecker3 = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Fant ikke boken: {addInput1}. Vennligst Skriv inn tittelen, forfatteren eller ID på en av bøkene i listen");
+                            Console.WriteLine("Eller skriv STOPP for å gå tilbake til menyen");
+                        }
+
+                    }
+                    break;
+                // Se på kurs du er meldt på
+                case 5:
+                    var activeCourse6 = from sts in c.Courses
+                                       where student.Courses.Contains(sts.Code)
+                                       select sts;
+
+                    var activeCourseList1 = activeCourse6.ToList();
+
+                    //Hvis studenten har emner på brukeren sin
+                    if (activeCourseList1.Count() > 0)
+                    {
+
+                        //Viser Liste med kurs på studenen
+                        Console.WriteLine($"\nListe med aktive kurs på :{student.Name}");
+                        foreach (Course courses in activeCourse6)
+                        {
+                            Console.WriteLine($"Navn: {courses.Name} Kode: {courses.Code} Studiepoeng: {courses.Points} Antall plasser: {courses.Capacity}");
+                        }
+
+                    }
+                        break;
+                //Avslutt
+                case 6:
+                    exit = false;
+                    break;
+
+
+            }
+
+        }
+        catch (System.FormatException)
+        {
+            Console.WriteLine("Du må skrive inn et tall");
+        }
+    }
 }
-
-

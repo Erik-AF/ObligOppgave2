@@ -85,12 +85,47 @@ public class Course
     }
     public void AddStudents(Student student, Course course)
     {
-        course.Participants.Add(student.StudentID);
+       bool checker = false;
+       foreach(String s in Participants) 
+       {
+            if (s.Contains(student.StudentID))
+            {
+                checker = true;
+            }
+        }
+        if (checker) 
+        {
+            throw new InvalidOperationException("Studenten er allerede meldt på kurset");
+        }
+        else
+        {
+            course.Participants.Add(student.StudentID);
+        }
     }
 
     public void RemoveStudents(Student student, Course course)
     {
-        course.Participants.Remove(student.StudentID);
+        bool checker = false;
+        foreach (String s in Participants)
+        {
+            if (s == student.StudentID)
+            {
+                checker = false;
+            }
+            else 
+            {
+                checker = true;
+            }
+        }
+        if (checker)
+        {
+            throw new InvalidOperationException("Studenten er ikke påmeldt kurset");
+        }
+        else
+        {
+            course.Participants.Remove(student.StudentID);
+        }
+
     }
 
     public void ShowCourses()
@@ -100,12 +135,12 @@ public class Course
             string niceGD = "";
             foreach (Grade g in cr.Grade)
             {
-                niceGD = $"{g.Student.Name} - {g.StudentGrade}";
+                niceGD += $"{g.Student.Name} - {g.StudentGrade} ";
             }
             string niceBK = "";
             foreach(Book b in cr.Books) 
             {
-                niceBK = $"{b.Title} - {b.Author}";
+                niceBK += $"{b.Title} - {b.Author} ";
             }
             string niceST = string.Join(", ", cr.Participants);
                 Console.WriteLine($"Navn: {cr.Name} Code: {cr.Code} Studiepoeng: {cr.Points} Antall plasser: {cr.Capacity} Deltagere: {niceST} Students Karakterer: {niceGD} Pensum: {niceBK}");
@@ -121,5 +156,30 @@ public class Course
     
         course.Books.Add(book);
     }
+    public void ShowGrade(Student student)
+    {
+        string niceGD = "";
+        foreach (Course cr in Courses)
+        {
 
-}
+            foreach (Grade g in cr.Grade)
+            {   
+                if(student.Name == g.Student.Name) 
+                {
+                    niceGD += $"Kurs: {cr.Code} | {g.Student.Name} - {g.StudentGrade} ";
+                }
+
+            }
+
+        }
+        if (niceGD == "")
+        {
+            Console.WriteLine("Du har ingen karakterer registrert på brukeren din");
+        }
+        else
+        {
+            Console.WriteLine(niceGD);
+        }
+    }
+
+    }
