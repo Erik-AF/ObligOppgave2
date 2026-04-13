@@ -5,6 +5,7 @@ using System.Text;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Net.NetworkInformation;
 
 namespace ObligOppgave2;
 
@@ -30,7 +31,8 @@ public class Course
     public string Name { get; set; }
     public decimal Points { get; set; }
     public int Capacity { get; set; }
-    public List<Grade> Grade { get; set; } = new ();
+    public List<Grade> Grade { get; set; } = new();
+    public List<Book> Books { get; set; } = new();
     public List<Course> Courses { get; set; } = new();
     public List<String> Participants { get; set; } = new();
 
@@ -64,10 +66,22 @@ public class Course
         Console.WriteLine("\nHvor mange plasser er det i kurset: ");
         int capacity = int.Parse(Console.ReadLine());
 
+        var courseChecker = (from courses1 in Courses
+                        where courses1.Name == name || courses1.Code == code
+                        select courses1).FirstOrDefault();
 
-        Course c = new Course(name, code, points, capacity);
+        if (courseChecker != null) 
+        {
+            Console.WriteLine($"Det finnes allerede et kurs med Navn: {name} eller Kode: {code}");
+        }
+        else 
+        {
+            Course c = new Course(name, code, points, capacity);
 
-        Courses.Add(c);
+            Courses.Add(c);
+        }
+
+
     }
     public void AddStudents(Student student, Course course)
     {
@@ -88,13 +102,24 @@ public class Course
             {
                 niceGD = $"{g.Student.Name} - {g.StudentGrade}";
             }
+            string niceBK = "";
+            foreach(Book b in cr.Books) 
+            {
+                niceBK = $"{b.Title} - {b.Author}";
+            }
             string niceST = string.Join(", ", cr.Participants);
-                Console.WriteLine($"Navn: {cr.Name} Code: {cr.Code} Studiepoeng: {cr.Points} Antall plasser: {cr.Capacity} Deltagere: {niceST} Students Karakterer: {niceGD}");
+                Console.WriteLine($"Navn: {cr.Name} Code: {cr.Code} Studiepoeng: {cr.Points} Antall plasser: {cr.Capacity} Deltagere: {niceST} Students Karakterer: {niceGD} Pensum: {niceBK}");
         }
     }
     public void SetGrade(Grade grade, Course course)
     {
         course.Grade.Add(grade);
+    }
+
+    public void AddBook(Book book, Course course) 
+    {
+    
+        course.Books.Add(book);
     }
 
 }

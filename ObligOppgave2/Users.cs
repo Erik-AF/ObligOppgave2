@@ -152,7 +152,7 @@ public class Student : Users
 
         public void ShowLoanHistorySt(Student student)
         {
-            Console.WriteLine($"\nLåne historiken til {student.Name}");
+            Console.WriteLine($"Låne historiken til {student.Name}:");
             foreach (var book in student.LoanHistory)
             {
                 Console.WriteLine(book);
@@ -300,7 +300,7 @@ public class Student : Users
 
         public void ShowLoanHistoryEmp(Employee employee)
         {
-            Console.WriteLine($"\nLåne historiken til {employee.Name}");
+            Console.WriteLine($"Låne historiken til {employee.Name}:");
             foreach (var book in employee.LoanHistory)
             {
                 Console.WriteLine(book);
